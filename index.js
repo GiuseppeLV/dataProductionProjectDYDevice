@@ -471,7 +471,7 @@ serviceClient.deleteModel( "dtmi:com:example:GenericPC;1");
 serviceClient.deleteModel( "dtmi:com:example:GenericNetworkInfo;1");
 serviceClient.deleteModel( "dtmi:com:example:GenericGyroscope;1");
 */
-
+/*
   const battery=require("./modelli/GenericBattery.json")
 const cpu=require("./modelli/GenericCpu.json")
 const device=require("./modelli/GenericDevice.json")
