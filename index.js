@@ -186,7 +186,7 @@ function printResultFor(op) {
       var cpuLoad=await getCpuLoad();
       var memory=await getMemory();
      // var deviceIpInfo= getDeviceNetInfo()
-      var graphiccard= await getGraphicCard()
+      //var graphiccard= await getGraphicCard()
       var modelName= await getModel()
       var operatingSystem = os.platform();
 
@@ -222,12 +222,12 @@ function printResultFor(op) {
           brand: cpu.brand,
           cpuUsage: cpuLoad.load,
           temperature: parseInt(cpuTemp.tempMax)
-        },
+        }/*
         GenericGraphicCard:{
           $metadata: {},
           size:graphiccard.memory,
           name:graphiccard.model
-        }/*
+        }
         GenericNetworkInfo:{
           $metadata: {},
           ipAddress:deviceIpInfo.deviceIP,
