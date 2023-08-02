@@ -316,14 +316,23 @@ function getDeviceNetInfo(){
 }
 
 */
-async function testSystemInfo() {
+async function getDeviceNetInfo() {
   try {
-    const osInfo = await si.osInfo();
-    console.log('Informazioni sul sistema operativo:', osInfo);
+    // Ottieni le informazioni sull'indirizzo IP del dispositivo
+    const networkInterfaces = await si.networkInterfaces();
+    const deviceIP = networkInterfaces.find((interface) => interface.ifaceName === 'eth0').ip4;
+
+    // Ottieni l'indirizzo MAC del dispositivo
+    const systemData = await si.system();
+    const deviceMAC = systemData.mac;
+
+    return { deviceIP, deviceMAC };
   } catch (error) {
     console.error('Errore:', error.message);
+    return { deviceIP: undefined, deviceMAC: undefined };
   }
 }
+
 async function main(){
 
 /*
@@ -363,10 +372,15 @@ const gyroscope=require("./modelli/GenericGyroscope.json");
 
 // Esegui la scansione ARP
 // Using a transpiler
-console.log("devotestare")
-testSystemInfo();
-console.log("ho testato")
-
+getDeviceNetInfo()
+  .then((netInfo) => {
+    console.log('Indirizzo IP:', netInfo.deviceIP);
+    console.log('Indirizzo MAC:', netInfo.deviceMAC);
+  })
+  .catch((error) => {
+    console.error('Errore durante il recupero delle informazioni di rete:', error);
+  });
+  
 sendHttpRequest()
   .then(async (data) => {
     await upsertDigitalTwinFunc(data); //qui dentro
