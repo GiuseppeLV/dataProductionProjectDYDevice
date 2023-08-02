@@ -185,23 +185,19 @@ function printResultFor(op) {
       var cpuTemp=await getCpuTemperature();
       var cpuLoad=await getCpuLoad();
       var memory=await getMemory();
-      var network=await getDevicesConnected()
-      var deviceIpInfo= getDeviceNetInfo()
+     // var deviceIpInfo= getDeviceNetInfo()
       var graphiccard= await getGraphicCard()
       var modelName= await getModel()
       var operatingSystem = os.platform();
-for (let i = 0; i < network.devices.length; i++) {
-  console.log(network.devices[i].mac);
-  console.log(network.devices[i].ip);
-}
+
 
 
       console.log("MEMORYDISKSIZE################"+deviceType);
-      const idTwin=calculateHash(deviceIpInfo.deviceMAC);
+     // const idTwin=calculateHash(deviceIpInfo.deviceMAC);
       
-      console.log("dentroPCTwin+"+idTwin)
+     // console.log("dentroPCTwin+"+idTwin)
       const MyPCTwin = {
-        $dtId: idTwin,
+        $dtId: "smartphone",
         $metadata: {
           $model: "dtmi:com:example:GenericPC;1"
         },
@@ -231,19 +227,19 @@ for (let i = 0; i < network.devices.length; i++) {
           $metadata: {},
           size:graphiccard.memory,
           name:graphiccard.model
-        },
+        }/*
         GenericNetworkInfo:{
           $metadata: {},
           ipAddress:deviceIpInfo.deviceIP,
           MacAddress:deviceIpInfo.deviceMAC,
           connectedDevices:JSON.stringify(network.devices),
         }
-        
+        */
     };
   
    
     console.log("twinid:"+JSON.stringify(MyPCTwin))
-    const createdTwinPC = await serviceClient.upsertDigitalTwin(idTwin, JSON.stringify(MyPCTwin));
+    const createdTwinPC = await serviceClient.upsertDigitalTwin("smartphone", JSON.stringify(MyPCTwin));
     console.log("Created Digital Twin:");
     console.log(inspect(createdTwinPC));
           console.log("Telemetry updated in Azure Digital Twin successfully.");
@@ -301,7 +297,6 @@ function getModel(){
 
 
 function getDeviceNetInfo(){
-  const os = require('os');
 
   const networkInterfaces = os.networkInterfaces();
   
