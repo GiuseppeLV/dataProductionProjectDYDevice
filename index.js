@@ -158,7 +158,7 @@ async function upsertDigitalTwinFunc(deviceType){
 const Protocol = require('azure-iot-device-mqtt').Mqtt;
 const Client = require('azure-iot-device').Client;
 var Message = require('azure-iot-device').Message;
-var deviceIpInfo= getDeviceNetInfo()
+//var deviceIpInfo= getDeviceNetInfo()
 var connectionString = "HostName=hubIndustrialInfProjectDTDevice.azure-devices.net;DeviceId="+"pcId"+";SharedAccessKey=YVX111rYT/iNQsZz8a532IhQT9sOy+hzAnQTpmgxnyw=";
 
 var client = Client.fromConnectionString(connectionString, Protocol);
@@ -295,7 +295,7 @@ function getModel(){
   });
 }
 
-
+/*
 function getDeviceNetInfo(){
 
   const networkInterfaces = os.networkInterfaces();
@@ -315,7 +315,15 @@ function getDeviceNetInfo(){
   return{deviceIP,deviceMAC}
 }
 
-
+*/
+async function testSystemInfo() {
+  try {
+    const osInfo = await si.osInfo();
+    console.log('Informazioni sul sistema operativo:', osInfo);
+  } catch (error) {
+    console.error('Errore:', error.message);
+  }
+}
 async function main(){
 
 /*
@@ -355,7 +363,9 @@ const gyroscope=require("./modelli/GenericGyroscope.json");
 
 // Esegui la scansione ARP
 // Using a transpiler
-
+console.log("devotestare")
+testSystemInfo();
+console.log("ho testato")
 
 sendHttpRequest()
   .then(async (data) => {
