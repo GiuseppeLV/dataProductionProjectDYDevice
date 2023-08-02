@@ -5,6 +5,28 @@ const { inspect } = require("util");
 const useragent = require('useragent');
 const os = require('os');
 
+const network = require('network');
+const getmac = require('getmac');
+
+function getDeviceNetInfo() {
+  return new Promise((resolve, reject) => {
+    network.get_private_ip((err, ip) => {
+      if (err) {
+        reject(err);
+      } else {
+        getmac.getMac((err, mac) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve({ ip, mac });
+          }
+        });
+      }
+    });
+  });
+}
+
+
 
 const url = "https://GenericDTDevice.api.weu.digitaltwins.azure.net";
 const credential = new DefaultAzureCredential();
@@ -316,22 +338,6 @@ function getDeviceNetInfo(){
 }
 
 */
-async function getDeviceNetInfo() {
-  try {
-    // Ottieni le informazioni sull'indirizzo IP del dispositivo
-    const networkInterfaces = await si.networkInterfaces();
-    const deviceIP = networkInterfaces.find((interface) => interface.ifaceName === 'eth0').ip4;
-
-    // Ottieni l'indirizzo MAC del dispositivo
-    const systemData = await si.system();
-    const deviceMAC = systemData.mac;
-
-    return { deviceIP, deviceMAC };
-  } catch (error) {
-    console.error('Errore:', error.message);
-    return { deviceIP: undefined, deviceMAC: undefined };
-  }
-}
 
 async function main(){
 
@@ -372,15 +378,17 @@ const gyroscope=require("./modelli/GenericGyroscope.json");
 
 // Esegui la scansione ARP
 // Using a transpiler
+// Esempio di utilizzo
 getDeviceNetInfo()
-  .then((netInfo) => {
-    console.log('Indirizzo IP:', netInfo.deviceIP);
-    console.log('Indirizzo MAC:', netInfo.deviceMAC);
+  .then((data) => {
+    console.log('IP Address:', data.ip);
+    console.log('MAC Address:', data.mac);
   })
   .catch((error) => {
-    console.error('Errore durante il recupero delle informazioni di rete:', error);
+    console.error('Error:', error.message);
   });
-  
+
+
 sendHttpRequest()
   .then(async (data) => {
     await upsertDigitalTwinFunc(data); //qui dentro
