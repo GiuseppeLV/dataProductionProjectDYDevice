@@ -262,19 +262,19 @@ function printResultFor(op) {
 
   client.open(connectCallback);
 }
-async function getGyroscopeInfo() {
-  try {
-      const sensorsData = await si.sensors();
-      const gyroData = sensorsData.sensors.find(sensor => sensor.type === 'gyroscope');
-      if (gyroData) {
-          console.log('Dati del giroscopio:', gyroData);
-      } else {
-          console.log('Giroscopio non disponibile.');
-      }
-  } catch (error) {
-      console.error('Errore:', error);
-  }
-}
+const sensor = require('node-sensor');
+
+// Inizializza il sensore del giroscopio
+const gyroSensor = new sensor.Gyroscope();
+
+// Gestisci i dati del giroscopio
+gyroSensor.on('data', data => {
+    console.log('Dati del giroscopio:', data);
+});
+
+// Avvia la lettura dei dati del giroscopio
+gyroSensor.start();
+
 const si = require('systeminformation');
 
 async function getGyroscopeInfo() {
