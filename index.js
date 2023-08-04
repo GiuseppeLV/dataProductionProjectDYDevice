@@ -5,27 +5,6 @@ const { inspect } = require("util");
 const useragent = require('useragent');
 const os = require('os');
 
-const network = require('network');
-const getmac = require('getmac');
-
-function getDeviceNetInfo() {
-  return new Promise((resolve, reject) => {
-    network.get_private_ip((err, ip) => {
-      if (err) {
-        reject(err);
-      } else {
-        getmac.getMac((err, mac) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve({ ip, mac });
-          }
-        });
-      }
-    });
-  });
-}
-
 
 
 const url = "https://GenericDTDevice.api.weu.digitaltwins.azure.net";
@@ -283,6 +262,38 @@ function printResultFor(op) {
 
   client.open(connectCallback);
 }
+async function getGyroscopeInfo() {
+  try {
+      const sensorsData = await si.sensors();
+      const gyroData = sensorsData.sensors.find(sensor => sensor.type === 'gyroscope');
+      if (gyroData) {
+          console.log('Dati del giroscopio:', gyroData);
+      } else {
+          console.log('Giroscopio non disponibile.');
+      }
+  } catch (error) {
+      console.error('Errore:', error);
+  }
+}
+const si = require('systeminformation');
+
+async function getGyroscopeInfo() {
+    try {
+        const sensorsData = await si.sensors();
+        const gyroData = sensorsData.sensors.find(sensor => sensor.type === 'gyroscope');
+        if (gyroData) {
+            console.log('Dati del giroscopio:', gyroData);
+        } else {
+            console.log('Giroscopio non disponibile.');
+        }
+    } catch (error) {
+        console.error('Errore:', error);
+    }
+}
+
+
+
+
 
 function getDevicesConnected(){
   const find= require('local-devices');
@@ -379,6 +390,8 @@ const gyroscope=require("./modelli/GenericGyroscope.json");
 // Esegui la scansione ARP
 // Using a transpiler
 // Esempio di utilizzo
+getGyroscopeInfo();
+
 getDeviceNetInfo()
   .then((data) => {
     console.log('IP Address:', data.ip);
