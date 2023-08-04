@@ -273,25 +273,6 @@ gyroSensor.on('data', data => {
 });
 
 // Avvia la lettura dei dati del giroscopio
-gyroSensor.start();
-
-const si = require('systeminformation');
-
-async function getGyroscopeInfo() {
-    try {
-        const sensorsData = await si.sensors();
-        const gyroData = sensorsData.sensors.find(sensor => sensor.type === 'gyroscope');
-        if (gyroData) {
-            console.log('Dati del giroscopio:', gyroData);
-        } else {
-            console.log('Giroscopio non disponibile.');
-        }
-    } catch (error) {
-        console.error('Errore:', error);
-    }
-}
-
-
 
 
 
@@ -390,7 +371,9 @@ const gyroscope=require("./modelli/GenericGyroscope.json");
 // Esegui la scansione ARP
 // Using a transpiler
 // Esempio di utilizzo
-getGyroscopeInfo();
+gyroSensor.start();
+
+
 
 getDeviceNetInfo()
   .then((data) => {
