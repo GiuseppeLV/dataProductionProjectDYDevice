@@ -263,7 +263,7 @@ function printResultFor(op) {
   client.open(connectCallback);
 }
 const sensor = require('node-sensor');
-
+function getGyroscope(){
 // Inizializza il sensore del giroscopio
 const gyroSensor = new sensor.Gyroscope();
 
@@ -271,7 +271,8 @@ const gyroSensor = new sensor.Gyroscope();
 gyroSensor.on('data', data => {
     console.log('Dati del giroscopio:', data);
 });
-
+gyroSensor.start();
+}
 // Avvia la lettura dei dati del giroscopio
 
 
@@ -371,10 +372,10 @@ const gyroscope=require("./modelli/GenericGyroscope.json");
 // Esegui la scansione ARP
 // Using a transpiler
 // Esempio di utilizzo
-gyroSensor.start();
 
 
 
+getGyroscope();
 getDeviceNetInfo()
   .then((data) => {
     console.log('IP Address:', data.ip);
