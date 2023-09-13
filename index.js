@@ -154,9 +154,9 @@ function getGraphicCard(){
 
 
 
-async function upsertDigitalTwinFunc(deviceType){
+async function upsertDigitalTwinFunc(){
   'use strict';
-console.log("è sicuramente un pc o smartphone:",deviceType)
+
 const Protocol = require('azure-iot-device-mqtt').Mqtt;
 const Client = require('azure-iot-device').Client;
 var Message = require('azure-iot-device').Message;
@@ -191,19 +191,17 @@ function printResultFor(op) {
       var modelName= await getModel()
       var operatingSystem = os.platform();
       var deviceIpInfo= getDeviceNetInfo()
-      if(deviceType=="PC"){
+
       var network=await getDevicesConnected()
  
       var graphiccard= await getGraphicCard()
-      }
+      
       /*
 for (let i = 0; i < network.devices.length; i++) {
   console.log(network.devices[i].mac);
   console.log(network.devices[i].ip);
 }*/ 
 
-
-      console.log("MEMORYDISKSIZE################"+deviceType);
       idTwin=calculateHash(deviceIpInfo.deviceMAC);
       const iothub = require('azure-iothub');
 
@@ -223,7 +221,7 @@ for (let i = 0; i < network.devices.length; i++) {
         if (res) console.log(' status: ' + res.statusCode + ' ' + res.statusMessage);
         if (deviceInfo) console.log(' device info: ' + JSON.stringify(deviceInfo));
     });
-      if(deviceType=="PC"){
+
       console.log("dentroPCTwin+"+idTwin)
       MyTwinObject = {
         $dtId: idTwin,
@@ -263,38 +261,8 @@ for (let i = 0; i < network.devices.length; i++) {
           MacAddress:deviceIpInfo.deviceMAC,
           connectedDevices:JSON.stringify(network.devices),
         }
-      }
-    }
-      else{
-        console.log("dentroSmartphoneTwin+"+idTwin)
-        MyTwinObject = {
-          $dtId: idTwin,
-          $metadata: {
-            $model: "dtmi:com:example:GenericPC;1"
-          },
-          name: modelName.model,
-          os: operatingSystem,
-          GenericRam:{
-            $metadata: {},
-            size:parseInt(ram.ramTotal),
-            ramUsage:parseFloat(ram.ramUsage)
-          },
-          GenericMemory:{
-            $metadata: {},
-            diskSpace:parseInt(memory.diskSizeGB),
-            memoryUsage:parseFloat(memory.diskUsedGB)
-          },
-          GenericCpu:{
-            $metadata: {},
-            frequency:cpu.frequency,
-            coreNumber:cpu.cores,
-            physicalCoreNumber: cpu.physicalCores,
-            manufacturer: cpu.manufacturer,
-            brand: cpu.brand,
-            cpuUsage: cpuLoad.load,
-            temperature: parseInt(cpuTemp.tempMax)
-          }
-      }
+      
+    
         
     };
   
@@ -396,7 +364,17 @@ serviceClient.deleteModel( "dtmi:com:example:GenericPC;1");
 serviceClient.deleteModel( "dtmi:com:example:GenericNetworkInfo;1");
 serviceClient.deleteModel( "dtmi:com:example:GenericGyroscope;1");
 */
-
+/*
+const battery=require("./modelli/GenericBattery.json")
+const cpu=require("./modelli/GenericCpu.json")
+const device=require("./modelli/GenericDevice.json")
+const graphiccard=require("./modelli/GenericGraphicCard.json")
+const memory=require("./modelli/GenericMemory.json")
+const pc=require("./modelli/GenericPC.json")
+const ram=require("./modelli/GenericRam.json")
+const smartphone=require("./modelli/GenericSmartphone.json");
+const networkinfo=require("./modelli/GenericNetworkInfo.json");
+const gyroscope=require("./modelli/GenericGyroscope.json");
 /*
   const newModels = [battery,cpu,device,graphiccard,pc,memory,ram,smartphone,networkinfo,gyroscope];
   const model = await serviceClient.createModels(newModels);
@@ -409,52 +387,11 @@ serviceClient.deleteModel( "dtmi:com:example:GenericGyroscope;1");
 // Using a transpiler
 
 
-sendHttpRequest()
-  .then(async (data) => {
-    await upsertDigitalTwinFunc(data); //qui dentro
-  })
-  .catch((error) => {
-    console.error(error.message);
-  });
+
+await upsertDigitalTwinFunc(); //qui dentro
 
 }
 
-
-const express = require('express');
-
-
-const app = express();
-const port = 3000;
-const axios = require('axios');
-const { createHash } = require("crypto");
-
-app.get('/', (req, res) => {
-  const userAgent = req.headers['user-agent'];
-
-
-  if (userAgent && userAgent.includes('Mobile')) {
-    console.log('Stai usando uno smartphone.');
-    res.send('Mobile');
-  } else {
-    console.log('Stai usando un PC o un altro dispositivo.');
-    res.send('PC');
-  }
-});
-
-app.listen(port, () => {
-  console.log(`Server in ascolto sulla porta ${port}`);
-});
-
-// Funzione per inviare una richiesta HTTP al server Express.js
-function sendHttpRequest() {
-  return axios.get('http://localhost:3000')
-    .then((response) => {
-      return response.data;
-    })
-    .catch((error) => {
-      throw new Error('Errore nella richiesta:' + error.message);
-    });
-}
 
 function calculateHash(input) {
   const crypto = require('crypto');
