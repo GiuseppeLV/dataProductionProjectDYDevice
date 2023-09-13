@@ -160,7 +160,7 @@ async function upsertDigitalTwinFunc(){
 const Protocol = require('azure-iot-device-mqtt').Mqtt;
 const Client = require('azure-iot-device').Client;
 var Message = require('azure-iot-device').Message;
-var deviceIpInfo= getDeviceNetInfo()
+//var deviceIpInfo= getDeviceNetInfo()
 var connectionString = "HostName=hubIndustrialInfProjectDTDevice.azure-devices.net;DeviceId="+"pcId"+";SharedAccessKey=YVX111rYT/iNQsZz8a532IhQT9sOy+hzAnQTpmgxnyw=";
 let idTwin;
 let MyTwinObject;
@@ -190,19 +190,15 @@ function printResultFor(op) {
       var memory=await getMemory();
       var modelName= await getModel()
       var operatingSystem = os.platform();
-      var deviceIpInfo= getDeviceNetInfo()
+     // var deviceIpInfo= getDeviceNetInfo()
 
-      var network=await getDevicesConnected()
+      //var network=await getDevicesConnected()
  
-      var graphiccard= await getGraphicCard()
-      
-      /*
-for (let i = 0; i < network.devices.length; i++) {
-  console.log(network.devices[i].mac);
-  console.log(network.devices[i].ip);
-}*/ 
+      //var graphiccard= await getGraphicCard()
+      idTwin="test"
 
-      idTwin=calculateHash(deviceIpInfo.deviceMAC);
+
+      //idTwin=calculateHash(deviceIpInfo.deviceMAC);
       const iothub = require('azure-iothub');
 
     
@@ -252,14 +248,14 @@ for (let i = 0; i < network.devices.length; i++) {
         },
         GenericGraphicCard:{
           $metadata: {},
-          size:graphiccard.memory,
-          name:graphiccard.model
+          size:0,
+          name:""
         },
         GenericNetworkInfo:{
           $metadata: {},
-          ipAddress:deviceIpInfo.deviceIP,
-          MacAddress:deviceIpInfo.deviceMAC,
-          connectedDevices:JSON.stringify(network.devices),
+          ipAddress:"",
+          MacAddress:"",
+          connectedDevices:"",
         }
       
     
