@@ -397,16 +397,6 @@ serviceClient.deleteModel( "dtmi:com:example:GenericNetworkInfo;1");
 serviceClient.deleteModel( "dtmi:com:example:GenericGyroscope;1");
 */
 
-const battery=require("./modelli/GenericBattery.json")
-const cpu=require("./modelli/GenericCpu.json")
-const device=require("./modelli/GenericDevice.json")
-const graphiccard=require("./modelli/GenericGraphicCard.json")
-const memory=require("./modelli/GenericMemory.json")
-const pc=require("./modelli/GenericPC.json")
-const ram=require("./modelli/GenericRam.json")
-const smartphone=require("./modelli/GenericSmartphone.json");
-const networkinfo=require("./modelli/GenericNetworkInfo.json");
-const gyroscope=require("./modelli/GenericGyroscope.json");
 /*
   const newModels = [battery,cpu,device,graphiccard,pc,memory,ram,smartphone,networkinfo,gyroscope];
   const model = await serviceClient.createModels(newModels);
