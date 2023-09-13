@@ -7,11 +7,11 @@ const os = require('os');
 
 
 
+
 const url = "https://GenericDTDevice.api.weu.digitaltwins.azure.net";
 const credential = new DefaultAzureCredential();
 const serviceClient = new DigitalTwinsClient(url, credential);
-
-const pcTwinId = "pcId";  
+ 
 const smartphoneTwinId="smartphoneId";
 
 function convertToGB(bytes) {
@@ -153,15 +153,17 @@ function getGraphicCard(){
 }
 
 
+
 async function upsertDigitalTwinFunc(deviceType){
   'use strict';
-
+console.log("è sicuramente un pc o smartphone:",deviceType)
 const Protocol = require('azure-iot-device-mqtt').Mqtt;
 const Client = require('azure-iot-device').Client;
 var Message = require('azure-iot-device').Message;
-//var deviceIpInfo= getDeviceNetInfo()
+var deviceIpInfo= getDeviceNetInfo()
 var connectionString = "HostName=hubIndustrialInfProjectDTDevice.azure-devices.net;DeviceId="+"pcId"+";SharedAccessKey=YVX111rYT/iNQsZz8a532IhQT9sOy+hzAnQTpmgxnyw=";
-
+let idTwin;
+let MyTwinObject;
 var client = Client.fromConnectionString(connectionString, Protocol);
 
 function printResultFor(op) {
@@ -186,19 +188,45 @@ function printResultFor(op) {
       var cpuTemp=await getCpuTemperature();
       var cpuLoad=await getCpuLoad();
       var memory=await getMemory();
-     // var deviceIpInfo= getDeviceNetInfo()
-      //var graphiccard= await getGraphicCard()
       var modelName= await getModel()
       var operatingSystem = os.platform();
-
+      var deviceIpInfo= getDeviceNetInfo()
+      if(deviceType=="PC"){
+      var network=await getDevicesConnected()
+ 
+      var graphiccard= await getGraphicCard()
+      }
+      /*
+for (let i = 0; i < network.devices.length; i++) {
+  console.log(network.devices[i].mac);
+  console.log(network.devices[i].ip);
+}*/ 
 
 
       console.log("MEMORYDISKSIZE################"+deviceType);
-     // const idTwin=calculateHash(deviceIpInfo.deviceMAC);
-      
-     // console.log("dentroPCTwin+"+idTwin)
-      const MyPCTwin = {
-        $dtId: "smartphone",
+      idTwin=calculateHash(deviceIpInfo.deviceMAC);
+      const iothub = require('azure-iothub');
+
+    
+      const connectionString = 'HostName=hubIndustrialInfProjectDTDevice.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=LZYmO5wFi/VWV1R/Vi7JWd+oDo1mcAdBAQmSChPwmp4=';
+
+      // Crea un nuovo dispositivo IoT
+      const registry = iothub.Registry.fromConnectionString(connectionString);
+
+      var device = {
+        deviceId: idTwin
+        
+        };
+
+      registry.create(device, function(err, deviceInfo, res) {
+        if (err) console.log(' error: ' + err.toString());
+        if (res) console.log(' status: ' + res.statusCode + ' ' + res.statusMessage);
+        if (deviceInfo) console.log(' device info: ' + JSON.stringify(deviceInfo));
+    });
+      if(deviceType=="PC"){
+      console.log("dentroPCTwin+"+idTwin)
+      MyTwinObject = {
+        $dtId: idTwin,
         $metadata: {
           $model: "dtmi:com:example:GenericPC;1"
         },
@@ -223,34 +251,67 @@ function printResultFor(op) {
           brand: cpu.brand,
           cpuUsage: cpuLoad.load,
           temperature: parseInt(cpuTemp.tempMax)
-        }/*
+        },
         GenericGraphicCard:{
           $metadata: {},
           size:graphiccard.memory,
           name:graphiccard.model
-        }
+        },
         GenericNetworkInfo:{
           $metadata: {},
           ipAddress:deviceIpInfo.deviceIP,
           MacAddress:deviceIpInfo.deviceMAC,
           connectedDevices:JSON.stringify(network.devices),
         }
-        */
+      }
+    }
+      else{
+        console.log("dentroSmartphoneTwin+"+idTwin)
+        MyTwinObject = {
+          $dtId: idTwin,
+          $metadata: {
+            $model: "dtmi:com:example:GenericPC;1"
+          },
+          name: modelName.model,
+          os: operatingSystem,
+          GenericRam:{
+            $metadata: {},
+            size:parseInt(ram.ramTotal),
+            ramUsage:parseFloat(ram.ramUsage)
+          },
+          GenericMemory:{
+            $metadata: {},
+            diskSpace:parseInt(memory.diskSizeGB),
+            memoryUsage:parseFloat(memory.diskUsedGB)
+          },
+          GenericCpu:{
+            $metadata: {},
+            frequency:cpu.frequency,
+            coreNumber:cpu.cores,
+            physicalCoreNumber: cpu.physicalCores,
+            manufacturer: cpu.manufacturer,
+            brand: cpu.brand,
+            cpuUsage: cpuLoad.load,
+            temperature: parseInt(cpuTemp.tempMax)
+          }
+      }
+        
     };
   
    
-    console.log("twinid:"+JSON.stringify(MyPCTwin))
-    const createdTwinPC = await serviceClient.upsertDigitalTwin("smartphone", JSON.stringify(MyPCTwin));
+    console.log("twinid:"+JSON.stringify(MyTwinObject))
+    const createdTwin = await serviceClient.upsertDigitalTwin(idTwin, JSON.stringify(MyTwinObject));
     console.log("Created Digital Twin:");
-    console.log(inspect(createdTwinPC));
+    console.log(inspect(createdTwin));
           console.log("Telemetry updated in Azure Digital Twin successfully.");
+
         } catch (error) {
           console.error("Failed to update telemetry in Azure Digital Twin:", error);
         }
 
         
           
-          var data = JSON.stringify({ "pcId": pcTwinId});
+          var data = JSON.stringify({ "Id": idTwin});
           var message = new Message(data=data);
           message.contentType="application/json",
           message.contentEncoding="utf-8",
@@ -262,20 +323,6 @@ function printResultFor(op) {
 
   client.open(connectCallback);
 }
-const sensor = require('node-sensor');
-function getGyroscope(){
-// Inizializza il sensore del giroscopio
-const gyroSensor = new sensor.Gyroscope();
-
-// Gestisci i dati del giroscopio
-gyroSensor.on('data', data => {
-    console.log('Dati del giroscopio:', data);
-});
-gyroSensor.start();
-}
-// Avvia la lettura dei dati del giroscopio
-
-
 
 function getDevicesConnected(){
   const find= require('local-devices');
@@ -310,8 +357,9 @@ function getModel(){
   });
 }
 
-/*
+
 function getDeviceNetInfo(){
+  const os = require('os');
 
   const networkInterfaces = os.networkInterfaces();
   
@@ -330,7 +378,6 @@ function getDeviceNetInfo(){
   return{deviceIP,deviceMAC}
 }
 
-*/
 
 async function main(){
 
@@ -349,8 +396,8 @@ serviceClient.deleteModel( "dtmi:com:example:GenericPC;1");
 serviceClient.deleteModel( "dtmi:com:example:GenericNetworkInfo;1");
 serviceClient.deleteModel( "dtmi:com:example:GenericGyroscope;1");
 */
-/*
-  const battery=require("./modelli/GenericBattery.json")
+
+const battery=require("./modelli/GenericBattery.json")
 const cpu=require("./modelli/GenericCpu.json")
 const device=require("./modelli/GenericDevice.json")
 const graphiccard=require("./modelli/GenericGraphicCard.json")
@@ -360,7 +407,6 @@ const ram=require("./modelli/GenericRam.json")
 const smartphone=require("./modelli/GenericSmartphone.json");
 const networkinfo=require("./modelli/GenericNetworkInfo.json");
 const gyroscope=require("./modelli/GenericGyroscope.json");
-*/
 /*
   const newModels = [battery,cpu,device,graphiccard,pc,memory,ram,smartphone,networkinfo,gyroscope];
   const model = await serviceClient.createModels(newModels);
@@ -371,19 +417,6 @@ const gyroscope=require("./modelli/GenericGyroscope.json");
 
 // Esegui la scansione ARP
 // Using a transpiler
-// Esempio di utilizzo
-
-
-
-getGyroscope();
-getDeviceNetInfo()
-  .then((data) => {
-    console.log('IP Address:', data.ip);
-    console.log('MAC Address:', data.mac);
-  })
-  .catch((error) => {
-    console.error('Error:', error.message);
-  });
 
 
 sendHttpRequest()
@@ -406,29 +439,15 @@ const axios = require('axios');
 const { createHash } = require("crypto");
 
 app.get('/', (req, res) => {
-  const userAgentString = req.headers['user-agent'];
-  const userAgent = useragent.parse(userAgentString);
+  const userAgent = req.headers['user-agent'];
 
-  const isAndroid = userAgent.os.family === 'Android';
-  const isIPhone = userAgent.device.family === 'iPhone';
-  const isWindowsPhone = userAgent.os.family === 'Windows Phone';
-  const isDesktop = !isAndroid && !isIPhone && !isWindowsPhone;
 
-  // Aggiungi condizioni per il riconoscimento di tablet e iPad
-  const isTablet = userAgent.device.family === 'iPad' || userAgent.device.family === 'tablet';
-
-  if (isAndroid) {
-    res.send('Android');
-  } else if (isIPhone) {
-    res.send('iPhone');
-  } else if (isWindowsPhone) {
-    res.send('WindowsPhone');
-  } else if (isDesktop) {
-    res.send('PC');
-  } else if (isTablet) {
-    res.send('Tablet');
+  if (userAgent && userAgent.includes('Mobile')) {
+    console.log('Stai usando uno smartphone.');
+    res.send('Mobile');
   } else {
-    res.send('sconosciuto');
+    console.log('Stai usando un PC o un altro dispositivo.');
+    res.send('PC');
   }
 });
 
