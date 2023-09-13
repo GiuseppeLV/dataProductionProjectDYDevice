@@ -1,6 +1,9 @@
 const batteryLevel = require('battery-level');
 
-(async () => {
-	console.log(await batteryLevel());
-	//=> 0.55
-})();
+batteryLevel()
+  .then(level => {
+    console.log('Livello della batteria:', level);
+  })
+  .catch(error => {
+    console.error('Errore nel recupero del livello della batteria:', error);
+  });
