@@ -156,14 +156,13 @@ let MyTwinObject;
       var operatingSystem = os.platform();
      
 
-      idTwin=calculateHash(deviceIpInfo.deviceMAC);
 
       MyTwinObject = {
-        $dtId: idTwin,
+        $dtId: idMobile,
         $metadata: {
-          $model: "dtmi:com:example:GenericPC;1"
+          $model: "dtmi:com:example:GenericSmartphone;1"
         },
-        idDevice: idTwin,
+        idDevice: idMobile,
         name: modelName.model,
         os: operatingSystem,
         GenericRam:{
@@ -184,7 +183,7 @@ let MyTwinObject;
           manufacturer: cpu.manufacturer,
           brand: cpu.brand,
           cpuUsage: cpuLoad.load,
-          temperature: parseInt(cpuTemp.tempMax)
+          temperature: parseInt(cpuTemp.tempMax) != null ? parseInt(cpuTemp.tempMax) : 0
         },
         GenericBattery:{
          $metadata: {},
