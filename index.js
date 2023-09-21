@@ -187,17 +187,17 @@ let MyTwinObject;
         },
         GenericBattery:{
          $metadata: {},
-         batteryLevel: batteryPerc
+         batteryLevel: batteryPerc != null ?batteryPerc : 0
         },
         GenericGyroscope:{
         $metadata:{},
-        xPosition:gyroscopeValues[0],
-        yPosition:gyroscopeValues[1],
-        zPosition:gyroscopeValues[2]
+        xPosition:gyroscopeValues[0] != null ? gyroscopeValues[0] : 0, 
+        yPosition:gyroscopeValues[1]!= null ? gyroscopeValues[1] : 0,
+        zPosition:gyroscopeValues[2]!= null ? gyroscopeValues[2] : 0
         },
         GenericProximitySensor:{
         $metadata:{},
-        DevicePosition:proximityValue
+        DevicePosition:proximityValue!= null ? proximityValue : ""
         }
          
   
