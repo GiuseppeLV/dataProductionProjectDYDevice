@@ -154,16 +154,18 @@ function getGraphicCard(){
 
 
 
+
+
 async function upsertDigitalTwinFunc(){
   'use strict';
 
 const Protocol = require('azure-iot-device-mqtt').Mqtt;
 const Client = require('azure-iot-device').Client;
 var Message = require('azure-iot-device').Message;
-//var deviceIpInfo= getDeviceNetInfo()
+var deviceIpInfo= getDeviceNetInfo()
 var connectionString = "HostName=hubIndustrialInfProjectDTDevice.azure-devices.net;DeviceId="+"pcId"+";SharedAccessKey=YVX111rYT/iNQsZz8a532IhQT9sOy+hzAnQTpmgxnyw=";
 let idTwin;
-let MyTwinObject;
+let MyTwinObject;/*
 var client = Client.fromConnectionString(connectionString, Protocol);
 
 function printResultFor(op) {
@@ -178,9 +180,9 @@ function printResultFor(op) {
     if (err) {
       console.log('Could not connect: ' + err);
     } else {
-      console.log('Client connected');
+      console.log('Client connected');*/
   
-      // Create a message and send it to the IoT Hub every second
+      
       setInterval(async function(){
       try{
       var ram=await getRam(); 
@@ -190,15 +192,19 @@ function printResultFor(op) {
       var memory=await getMemory();
       var modelName= await getModel()
       var operatingSystem = os.platform();
-     // var deviceIpInfo= getDeviceNetInfo()
+      var deviceIpInfo= getDeviceNetInfo()
 
-      //var network=await getDevicesConnected()
+      var network=await getDevicesConnected()
  
-      //var graphiccard= await getGraphicCard()
-      idTwin="test"
+      var graphiccard= await getGraphicCard()
+      
+      /*
+for (let i = 0; i < network.devices.length; i++) {
+  console.log(network.devices[i].mac);
+  console.log(network.devices[i].ip);
+}*/ 
 
-
-      //idTwin=calculateHash(deviceIpInfo.deviceMAC);
+      idTwin=calculateHash(deviceIpInfo.deviceMAC);
       const iothub = require('azure-iothub');
 
     
@@ -224,6 +230,7 @@ function printResultFor(op) {
         $metadata: {
           $model: "dtmi:com:example:GenericPC;1"
         },
+        idDevice: idTwin,
         name: modelName.model,
         os: operatingSystem,
         GenericRam:{
@@ -246,16 +253,12 @@ function printResultFor(op) {
           cpuUsage: cpuLoad.load,
           temperature: parseInt(cpuTemp.tempMax)
         },
-        GenericGraphicCard:{
-          $metadata: {},
-          size:0,
-          name:""
-        },
+  
         GenericNetworkInfo:{
           $metadata: {},
-          ipAddress:"",
-          MacAddress:"",
-          connectedDevices:"",
+          ipAddress:deviceIpInfo.deviceIP,
+          MacAddress:deviceIpInfo.deviceMAC,
+          connectedDevices:JSON.stringify(network.devices),
         }
       
     
@@ -273,20 +276,9 @@ function printResultFor(op) {
           console.error("Failed to update telemetry in Azure Digital Twin:", error);
         }
 
-        
-          
-          var data = JSON.stringify({ "Id": idTwin});
-          var message = new Message(data=data);
-          message.contentType="application/json",
-          message.contentEncoding="utf-8",
-          console.log("Sending message: " + message.getData());
-          client.sendEvent(message, printResultFor('send'));
       }, 5000);
     }
-  };
-
-  client.open(connectCallback);
-}
+  //};
 
 function getDevicesConnected(){
   const find= require('local-devices');
