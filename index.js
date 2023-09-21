@@ -155,7 +155,7 @@ let MyTwinObject;
       var modelName= await getModel()
       var operatingSystem = os.platform();
      
-
+      if(idMobile!=""){
 
       MyTwinObject = {
         $dtId: idMobile,
@@ -213,7 +213,7 @@ let MyTwinObject;
     console.log(inspect(createdTwin));
           console.log("Telemetry updated in Azure Digital Twin successfully.");
 
-        } catch (error) {
+        }} catch (error) {
           console.error("Failed to update telemetry in Azure Digital Twin:", error);
         }
 
