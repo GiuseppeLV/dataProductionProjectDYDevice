@@ -131,26 +131,6 @@ function getCpuLoad(){
 }
 
 
-function getGraphicCard(){
-  return new Promise((resolve, reject) => {
-  si.graphics()
-  .then(data =>{ 
-    const firstGraphicsCard = data.controllers[0];
-    var model=firstGraphicsCard.model;
-    var vendor=firstGraphicsCard.vendor;
-    var memory= firstGraphicsCard.vram; //in MB
-    resolve({
-      model,
-      vendor,
-      memory
-    });
-  })
-  .catch(error => {
-  console.error(error);
-  reject(error);
-  });
-  });
-}
 
 
 
@@ -165,23 +145,8 @@ var Message = require('azure-iot-device').Message;
 var deviceIpInfo= getDeviceNetInfo()
 var connectionString = "HostName=hubIndustrialInfProjectDTDevice.azure-devices.net;DeviceId="+"pcId"+";SharedAccessKey=YVX111rYT/iNQsZz8a532IhQT9sOy+hzAnQTpmgxnyw=";
 let idTwin;
-let MyTwinObject;/*
-var client = Client.fromConnectionString(connectionString, Protocol);
-
-function printResultFor(op) {
-    return function printResult(err, res) {
-      if (err) console.log(op + ' error: ' + err.toString());
-      if (res) console.log(op + ' status: ' + res.constructor.name);
-    };
-  }
-
-
-  var connectCallback = function (err) {
-    if (err) {
-      console.log('Could not connect: ' + err);
-    } else {
-      console.log('Client connected');*/
-  
+let MyTwinObject;
+ 
       
       setInterval(async function(){
       try{
@@ -192,17 +157,9 @@ function printResultFor(op) {
       var memory=await getMemory();
       var modelName= await getModel()
       var operatingSystem = os.platform();
-      var deviceIpInfo= getDeviceNetInfo()
+     
 
-      var network=await getDevicesConnected()
- 
-      var graphiccard= await getGraphicCard()
-      
-      /*
-for (let i = 0; i < network.devices.length; i++) {
-  console.log(network.devices[i].mac);
-  console.log(network.devices[i].ip);
-}*/ 
+
 
       idTwin=calculateHash(deviceIpInfo.deviceMAC);
       const iothub = require('azure-iothub');
@@ -376,9 +333,10 @@ const gyroscope=require("./modelli/GenericGyroscope.json");
 
 
 
-await upsertDigitalTwinFunc(); //qui dentro
+//await upsertDigitalTwinFunc(); //qui dentro
 
 }
+
 
 
 function calculateHash(input) {
@@ -387,6 +345,27 @@ function calculateHash(input) {
   sha256Hash.update(input);
   return sha256Hash.digest('hex');
 }
+const WebSocket = require('ws');
 
+// Crea un server WebSocket sulla porta desiderata
+const server = new WebSocket.Server({ port: 8080 });
+
+// Gestisci la connessione dei client
+server.on('connection', (socket) => {
+    console.log('Client connected');
+
+    // Gestisci i messaggi in arrivo dal client
+    socket.on('message', (message) => {
+        console.log('Received message:', message);
+
+        // Esegui l'elaborazione dei dati qui
+        // In base alla struttura dei dati inviati dal client Android, puoi analizzarli e utilizzarli come necessario.
+    });
+
+    // Gestisci la chiusura della connessione
+    socket.on('close', () => {
+        console.log('Client disconnected');
+    });
+});
 
 main()
