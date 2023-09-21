@@ -317,7 +317,7 @@ const gyroscope=require("./modelli/GenericGyroscope.json");
 
 
 
-//await upsertDigitalTwinFunc(); //qui dentro
+await upsertDigitalTwinFunc(); //qui dentro
 
 }
 
