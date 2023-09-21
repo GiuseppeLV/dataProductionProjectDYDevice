@@ -5,10 +5,10 @@ const { inspect } = require("util");
 const useragent = require('useragent');
 const os = require('os');
 
-
-const gyroscopeValues = [];
-const batteryPerc=0;
-const proximityValue="";
+let idMobile="";
+let gyroscopeValues = [];
+let batteryPerc=0;
+let proximityValue="";
 
 const url = "https://GenericDTDevice.api.weu.digitaltwins.azure.net";
 const credential = new DefaultAzureCredential();
@@ -357,7 +357,7 @@ server.on('connection', (socket) => {
         console.log("Proximity Value:", parsedMessage.proximityValue);
         batteryPerc=parsedMessage.battery;
         console.log("Battery:", parsedMessage.battery);
-        float 
+        
 
      
     });
