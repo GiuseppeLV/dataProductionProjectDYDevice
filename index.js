@@ -6,7 +6,9 @@ const useragent = require('useragent');
 const os = require('os');
 
 
-
+const gyroscopeValues = [];
+const batteryPerc=0;
+const proximityValue="";
 
 const url = "https://GenericDTDevice.api.weu.digitaltwins.azure.net";
 const credential = new DefaultAzureCredential();
@@ -139,11 +141,6 @@ function getCpuLoad(){
 async function upsertDigitalTwinFunc(){
   'use strict';
 
-const Protocol = require('azure-iot-device-mqtt').Mqtt;
-const Client = require('azure-iot-device').Client;
-var Message = require('azure-iot-device').Message;
-var deviceIpInfo= getDeviceNetInfo()
-var connectionString = "HostName=hubIndustrialInfProjectDTDevice.azure-devices.net;DeviceId="+"pcId"+";SharedAccessKey=YVX111rYT/iNQsZz8a532IhQT9sOy+hzAnQTpmgxnyw=";
 let idTwin;
 let MyTwinObject;
  
@@ -159,29 +156,8 @@ let MyTwinObject;
       var operatingSystem = os.platform();
      
 
-
-
       idTwin=calculateHash(deviceIpInfo.deviceMAC);
-      const iothub = require('azure-iothub');
 
-    
-      const connectionString = 'HostName=hubIndustrialInfProjectDTDevice.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=LZYmO5wFi/VWV1R/Vi7JWd+oDo1mcAdBAQmSChPwmp4=';
-
-      // Crea un nuovo dispositivo IoT
-      const registry = iothub.Registry.fromConnectionString(connectionString);
-
-      var device = {
-        deviceId: idTwin
-        
-        };
-
-      registry.create(device, function(err, deviceInfo, res) {
-        if (err) console.log(' error: ' + err.toString());
-        if (res) console.log(' status: ' + res.statusCode + ' ' + res.statusMessage);
-        if (deviceInfo) console.log(' device info: ' + JSON.stringify(deviceInfo));
-    });
-
-      console.log("dentroPCTwin+"+idTwin)
       MyTwinObject = {
         $dtId: idTwin,
         $metadata: {
@@ -210,13 +186,22 @@ let MyTwinObject;
           cpuUsage: cpuLoad.load,
           temperature: parseInt(cpuTemp.tempMax)
         },
-  
-        GenericNetworkInfo:{
-          $metadata: {},
-          ipAddress:deviceIpInfo.deviceIP,
-          MacAddress:deviceIpInfo.deviceMAC,
-          connectedDevices:JSON.stringify(network.devices),
+        GenericBattery:{
+         $metadata: {},
+         batteryLevel: batteryPerc
+        },
+        GenericGyroscope:{
+        $metadata:{},
+        xPosition:gyroscopeValues[0],
+        yPosition:gyroscopeValues[1],
+        zPosition:gyroscopeValues[2]
+        },
+        GenericProximitySensor:{
+        $metadata:{},
+        DevicePosition:proximityValue
         }
+         
+  
       
     
         
@@ -356,10 +341,26 @@ server.on('connection', (socket) => {
 
     // Gestisci i messaggi in arrivo dal client
     socket.on('message', (message) => {
-        console.log('Received message:', message);
+        const parsedMessage = JSON.parse(message);
+        
+        // Ora puoi accedere ai dati all'interno del messaggio come oggetto JavaScript
+        console.log("ID:", parsedMessage.id);
+        idMobile=parsedMessage.id
+        gyroscopeValues = [
+          parsedMessage.gyroscope.r0,
+          parsedMessage.gyroscope.r1,
+          parsedMessage.gyroscope.r2
+        ];
+        console.log("Gyroscope r0:", parsedMessage.gyroscope.r0);
+        console.log("Gyroscope r1:", parsedMessage.gyroscope.r1);
+        console.log("Gyroscope r2:", parsedMessage.gyroscope.r2);
+        proximityValue=parsedMessage.proximityValue;
+        console.log("Proximity Value:", parsedMessage.proximityValue);
+        batteryPerc=parsedMessage.battery;
+        console.log("Battery:", parsedMessage.battery);
+        float 
 
-        // Esegui l'elaborazione dei dati qui
-        // In base alla struttura dei dati inviati dal client Android, puoi analizzarli e utilizzarli come necessario.
+     
     });
 
     // Gestisci la chiusura della connessione
