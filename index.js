@@ -14,14 +14,13 @@ const url = "https://GenericDTDevice.api.weu.digitaltwins.azure.net";
 const credential = new DefaultAzureCredential();
 const serviceClient = new DigitalTwinsClient(url, credential);
  
-const smartphoneTwinId="smartphoneId";
 
-function convertToGB(bytes) {
+function convertToGB(bytes) { //funzione di conversione in GB per la memoria
   return (bytes / 1024 / 1024 / 1024).toFixed(2);
 }
 
 
-function getRam() {
+function getRam() { //funzione per ram totale e disponibile
   return new Promise((resolve, reject) => {
     si.mem()
       .then(data => {
@@ -42,15 +41,13 @@ function getRam() {
   });
 }
 
-function getMemory(){
+function getMemory(){ //funzione per ritornare valori della memoria
   return new Promise((resolve, reject) => {
   si.fsSize()
   .then(data => {
-    // Seleziona il primo disco nel caso ci siano più dischi
-    const disk = data[0];
+    const disk = data[0]; // Seleziona il primo disco nel caso ci siano più dischi
     const diskSizeGB = convertToGB(disk.size);
     let diskUsedGB = convertToGB(disk.used);
-    // Stampa le informazioni sul disco totale e utilizzato
     resolve({
       diskUsedGB,
       diskSizeGB
@@ -68,7 +65,7 @@ function getMemory(){
 
 }
 
-function getCpu(){
+function getCpu(){ //funzione per ritornare vari campi della cpu
   return new Promise((resolve, reject) => {
   si.cpu()
   .then(data => {
@@ -110,7 +107,7 @@ function getCpu(){
   });
 }
 
-function getCpuLoad(){
+function getCpuLoad(){ //funzione per ritornare l'attuale carico della cpu (potrebbe non funzionare su tutti gli smartphone)
   return new Promise((resolve, reject) => {
   si.currentLoad()
   .then(data =>{ 
@@ -127,15 +124,8 @@ function getCpuLoad(){
 }
 
 
-
-
-
-
-
 async function upsertDigitalTwinFunc(){
   'use strict';
-
-let idTwin;
 let MyTwinObject;
  
       
@@ -152,7 +142,7 @@ let MyTwinObject;
       if(idMobile!=""){
 
       MyTwinObject = {
-        $dtId: idMobile,
+        $dtId: idMobile, //è univoco per ogni dispositivo
         $metadata: {
           $model: "dtmi:com:example:GenericSmartphone;1"
         },
@@ -192,19 +182,12 @@ let MyTwinObject;
         GenericProximitySensor:{
         $metadata:{},
         DevicePosition:proximityValue!= null ? proximityValue : ""
-        }
-         
-  
-      
-    
-        
+        }       
     };
   
    
-    console.log("twinid:"+JSON.stringify(MyTwinObject))
-
-      console.log("twinidddd:"+idMobile)
-    const createdTwin = await serviceClient.upsertDigitalTwin(idMobile, JSON.stringify(MyTwinObject));
+    console.log("DigitalTwin da inviare:"+JSON.stringify(MyTwinObject))
+    const createdTwin = await serviceClient.upsertDigitalTwin(idMobile, JSON.stringify(MyTwinObject));//upsert del DT
     console.log("Created Digital Twin:");
     console.log(inspect(createdTwin));
           console.log("Telemetry updated in Azure Digital Twin successfully.");
@@ -216,23 +199,6 @@ let MyTwinObject;
       }, 5000);
     }
   //};
-
-function getDevicesConnected(){
-  const find= require('local-devices');
-  return new Promise((resolve, reject) => {
-  find()
-  .then(devices =>{ 
-    devices
-    resolve({
-      devices
-    });
-  })
-  .catch(error => {
-  console.error(error);
-  reject(error);
-  });
-  });
-}
 
 function getModel(){
   return new Promise((resolve, reject) => {
@@ -250,68 +216,20 @@ function getModel(){
   });
 }
 
-
-
 async function main(){
-
-/*
-serviceClient.deleteModel("dtmi:com:example:GenericSmartphone;1");
-serviceClient.deleteModel( "dtmi:com:example:GenericCpu;1");
-serviceClient.deleteModel("dtmi:com:example:GenericBattery;1");
-serviceClient.deleteModel("dtmi:com:example:GenericMemory;1");
-serviceClient.deleteModel("dtmi:com:example:GenericGraphicCard;1");
-
-serviceClient.deleteModel("dtmi:com:example:GenericRam;1");
-
-serviceClient.deleteModel("dtmi:com:example:GenericDevice;1");
-serviceClient.deleteModel( "dtmi:com:example:GenericPC;1");
-
-serviceClient.deleteModel( "dtmi:com:example:GenericNetworkInfo;1");
-serviceClient.deleteModel( "dtmi:com:example:GenericGyroscope;1");
-*/
-/*
-const battery=require("./modelli/GenericBattery.json")
-const cpu=require("./modelli/GenericCpu.json")
-const device=require("./modelli/GenericDevice.json")
-const graphiccard=require("./modelli/GenericGraphicCard.json")
-const memory=require("./modelli/GenericMemory.json")
-const pc=require("./modelli/GenericPC.json")
-const ram=require("./modelli/GenericRam.json")
-const smartphone=require("./modelli/GenericSmartphone.json");
-const networkinfo=require("./modelli/GenericNetworkInfo.json");
-const gyroscope=require("./modelli/GenericGyroscope.json");
-/*
-  const newModels = [battery,cpu,device,graphiccard,pc,memory,ram,smartphone,networkinfo,gyroscope];
-  const model = await serviceClient.createModels(newModels);
-  console.log("Created Model:");
-  console.log(inspect(model));
-*/
-//upsertDigitalTwinFunc("pcId");
-
-// Esegui la scansione ARP
-// Using a transpiler
-
-
-
-await upsertDigitalTwinFunc(); //qui dentro
-
+await upsertDigitalTwinFunc(); 
 }
 
 
-const WebSocket = require('ws');
-
-// Crea un server WebSocket sulla porta desiderata
+const WebSocket = require('ws'); //creazione server websocket per ricevere dati inviati da Android Studio relativi a sensore di prossimità, giroscopio e livello di batteria
 const server = new WebSocket.Server({ port: 8080 });
 
-// Gestisci la connessione dei client
 server.on('connection', (socket) => {
     console.log('Client connected');
 
-    // Gestisci i messaggi in arrivo dal client
     socket.on('message', (message) => {
         const parsedMessage = JSON.parse(message);
         
-        // Ora puoi accedere ai dati all'interno del messaggio come oggetto JavaScript
         console.log("ID:", parsedMessage.id);
         idMobile=parsedMessage.id
         gyroscopeValues = [
@@ -325,13 +243,8 @@ server.on('connection', (socket) => {
         proximityValue=parsedMessage.proximityValue;
         console.log("Proximity Value:", parsedMessage.proximityValue);
         batteryPerc=parsedMessage.battery;
-        console.log("Battery:", parsedMessage.battery);
-        
-
-     
+        console.log("Battery:", parsedMessage.battery);    
     });
-
-    // Gestisci la chiusura della connessione
     socket.on('close', () => {
         console.log('Client disconnected');
     });
