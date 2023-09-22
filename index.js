@@ -176,7 +176,7 @@ let MyTwinObject;
           physicalCoreNumber: cpu.physicalCores!= null ?cpu.physicalCores : 0 ,
           manufacturer: cpu.manufacturer,
           brand: cpu.brand,
-          cpuUsage: cpuLoad.load != null ?cpuLoad.load : 0,  
+          cpuUsage: cpuLoad.load != "" ?cpuLoad.load : 0,  
           temperature: parseInt(cpuTemp.tempMax) != null ? parseInt(cpuTemp.tempMax) : 0
         },
         GenericBattery:{
