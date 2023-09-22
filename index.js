@@ -19,14 +19,8 @@ const smartphoneTwinId="smartphoneId";
 function convertToGB(bytes) {
   return (bytes / 1024 / 1024 / 1024).toFixed(2);
 }
-/*
-function isMobile() {
-  return /iPhone|Android/.test(navigator.userAgent);
-}
-*/
-function isPC() {
-  return !isMobile();
-}
+
+
 function getRam() {
   return new Promise((resolve, reject) => {
     si.mem()
@@ -167,22 +161,22 @@ let MyTwinObject;
         os: operatingSystem,
         GenericRam:{
           $metadata: {},
-          size:parseInt(ram.ramTotal),
-          ramUsage:parseFloat(ram.ramUsage)
+          size:parseInt(ram.ramTotal)!= null ?parseInt(ram.ramTotal) : 0,
+          ramUsage:parseFloat(ram.ramUsage)!=null?parseFloat(ram.ramUsage):0
         },
         GenericMemory:{
           $metadata: {},
-          diskSpace:parseInt(memory.diskSizeGB),
-          memoryUsage:parseFloat(memory.diskUsedGB)
+          diskSpace:parseInt(memory.diskSizeGB)!=null?parseInt(memory.diskSizeGB):0,
+          memoryUsage:parseFloat(memory.diskUsedGB)!=null?parseFloat(memory.diskUsedGB):0
         },
         GenericCpu:{
           $metadata: {},
-          frequency:cpu.frequency,
-          coreNumber:cpu.cores,
-          physicalCoreNumber: cpu.physicalCores,
+          frequency:cpu.frequency!= null ?cpu.frequency : 0,
+          coreNumber:cpu.cores!= null ?cpu.cores : 0,
+          physicalCoreNumber: cpu.physicalCores!= null ?cpu.physicalCores : 0 ,
           manufacturer: cpu.manufacturer,
           brand: cpu.brand,
-          cpuUsage: cpuLoad.load,
+          cpuUsage: cpuLoad.load != null ?cpuLoad.load : 0,  
           temperature: parseInt(cpuTemp.tempMax) != null ? parseInt(cpuTemp.tempMax) : 0
         },
         GenericBattery:{
@@ -191,9 +185,9 @@ let MyTwinObject;
         },
         GenericGyroscope:{
         $metadata:{},
-        xPosition:gyroscopeValues[0] != null ? gyroscopeValues[0] : 0, 
-        yPosition:gyroscopeValues[1]!= null ? gyroscopeValues[1] : 0,
-        zPosition:gyroscopeValues[2]!= null ? gyroscopeValues[2] : 0
+        xPosition:gyroscopeValues[0], 
+        yPosition:gyroscopeValues[1],
+        zPosition:gyroscopeValues[2]
         },
         GenericProximitySensor:{
         $metadata:{},
@@ -208,13 +202,13 @@ let MyTwinObject;
   
    
     console.log("twinid:"+JSON.stringify(MyTwinObject))
-    if(idMobile!="")
+
       console.log("twinidddd:"+idMobile)
     const createdTwin = await serviceClient.upsertDigitalTwin(idTwin, JSON.stringify(MyTwinObject));
     console.log("Created Digital Twin:");
     console.log(inspect(createdTwin));
           console.log("Telemetry updated in Azure Digital Twin successfully.");
-      }
+      
         }} catch (error) {
           console.error("Failed to update telemetry in Azure Digital Twin:", error);
         }
@@ -256,26 +250,6 @@ function getModel(){
   });
 }
 
-
-function getDeviceNetInfo(){
-  const os = require('os');
-
-  const networkInterfaces = os.networkInterfaces();
-  
-  let deviceIP, deviceMAC;
-  
-  // Itera sulle interfacce di rete per trovare l'indirizzo IP e l'indirizzo MAC del dispositivo
-  Object.keys(networkInterfaces).forEach((interfaceName) => {
-    networkInterfaces[interfaceName].forEach((interface) => {
-      if (interface.family === 'IPv4' && !interface.internal) {
-        deviceIP = interface.address;
-        deviceMAC = interface.mac;
-      }
-    });
-  });
-  
-  return{deviceIP,deviceMAC}
-}
 
 
 async function main(){
@@ -324,13 +298,6 @@ await upsertDigitalTwinFunc(); //qui dentro
 }
 
 
-
-function calculateHash(input) {
-  const crypto = require('crypto');
-  const sha256Hash = crypto.createHash('sha256');
-  sha256Hash.update(input);
-  return sha256Hash.digest('hex');
-}
 const WebSocket = require('ws');
 
 // Crea un server WebSocket sulla porta desiderata
