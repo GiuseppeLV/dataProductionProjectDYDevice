@@ -204,7 +204,7 @@ let MyTwinObject;
     console.log("twinid:"+JSON.stringify(MyTwinObject))
 
       console.log("twinidddd:"+idMobile)
-    const createdTwin = await serviceClient.upsertDigitalTwin(idTwin, JSON.stringify(MyTwinObject));
+    const createdTwin = await serviceClient.upsertDigitalTwin(idMobile, JSON.stringify(MyTwinObject));
     console.log("Created Digital Twin:");
     console.log(inspect(createdTwin));
           console.log("Telemetry updated in Azure Digital Twin successfully.");
